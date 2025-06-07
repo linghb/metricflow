@@ -35,36 +35,36 @@ class MutabilityType(ExtendedEnum):
 class MutabilityTypeParams(HashableBaseModel):
     """Type params add additional context to mutability"""
 
-    min: Optional[str]
-    max: Optional[str]
-    update_cron: Optional[str]
-    along: Optional[str]
+    min: Optional[str] = None
+    max: Optional[str] = None
+    update_cron: Optional[str] = None
+    along: Optional[str] = None
 
 
 class Mutability(HashableBaseModel):
     """Describes the mutability properties of a data source"""
 
     type: MutabilityType
-    type_params: Optional[MutabilityTypeParams]
+    type_params: Optional[MutabilityTypeParams] = None
 
 
 class DataSource(HashableBaseModel, ModelWithMetadataParsing):
     """Describes a data source"""
 
     name: str
-    description: Optional[str]
-    sql_table: Optional[str]
-    sql_query: Optional[str]
-    dbt_model: Optional[str]
+    description: Optional[str] = None
+    sql_table: Optional[str] = None
+    sql_query: Optional[str] = None
+    dbt_model: Optional[str] = None
 
     identifiers: Sequence[Identifier] = []
     measures: Sequence[Measure] = []
     dimensions: Sequence[Dimension] = []
 
-    mutability: Mutability = Mutability(type=MutabilityType.FULL_MUTATION)
+    mutability: Mutability = Mutability(type=MutabilityType.FULL_MUTATION, type_params=None)
 
     origin: DataSourceOrigin = DataSourceOrigin.SOURCE
-    metadata: Optional[Metadata]
+    metadata: Optional[Metadata] = None
 
     @property
     def identifier_references(self) -> List[LinkableElementReference]:  # noqa: D

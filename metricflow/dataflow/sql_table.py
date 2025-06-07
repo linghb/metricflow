@@ -4,7 +4,7 @@ from typing import Optional, Tuple, Union
 from metricflow.model.objects.base import FrozenBaseModel, PydanticCustomInputParser, PydanticParseableValueType
 
 
-class SqlTable(PydanticCustomInputParser, FrozenBaseModel):
+class SqlTable(FrozenBaseModel, PydanticCustomInputParser):
     """Represents a reference to a SQL table."""
 
     db_name: Optional[str] = None

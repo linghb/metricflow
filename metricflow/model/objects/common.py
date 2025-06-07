@@ -59,7 +59,7 @@ class YamlConfigFile(HashableBaseModel):
 
     filepath: str
     contents: str
-    url: Optional[str]
+    url: Optional[str] = None
 
 
 class SourceContext(HashableBaseModel):  # noqa: D

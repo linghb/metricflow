@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
+from pydantic import field_validator
 from metricflow.errors.errors import ParsingException
 from metricflow.model.objects.common import Metadata
 from metricflow.model.objects.constraints.where import WhereClauseConstraint
@@ -27,7 +28,7 @@ class MetricType(ExtendedEnum):
     DERIVED = "derived"
 
 
-class MetricInputMeasure(PydanticCustomInputParser, HashableBaseModel):
+class MetricInputMeasure(HashableBaseModel, PydanticCustomInputParser):
     """Provides a pointer to a measure along with metric-specific processing directives
 
     If an alias is set, this will be used as the string name reference for this measure after the aggregation
@@ -35,8 +36,8 @@ class MetricInputMeasure(PydanticCustomInputParser, HashableBaseModel):
     """
 
     name: str
-    constraint: Optional[WhereClauseConstraint]
-    alias: Optional[str]
+    constraint: Optional[WhereClauseConstraint] = None
+    alias: Optional[str] = None
 
     @classmethod
     def _from_yaml_value(cls, input: PydanticParseableValueType) -> MetricInputMeasure:
@@ -65,7 +66,7 @@ class MetricInputMeasure(PydanticCustomInputParser, HashableBaseModel):
         return MeasureReference(element_name=self.alias or self.name)
 
 
-class MetricTimeWindow(PydanticCustomInputParser, HashableBaseModel):
+class MetricTimeWindow(HashableBaseModel, PydanticCustomInputParser):
     """Describes the window of time the metric should be accumulated over, e.g., '1 day', '2 weeks', etc"""
 
     count: int
@@ -124,23 +125,44 @@ class MetricInput(HashableBaseModel):
     """Provides a pointer to a metric along with the additional properties used on that metric."""
 
     name: str
-    constraint: Optional[WhereClauseConstraint]
-    alias: Optional[str]
-    offset_window: Optional[MetricTimeWindow]
-    offset_to_grain: Optional[TimeGranularity]
+    constraint: Optional[WhereClauseConstraint] = None
+    alias: Optional[str] = None
+    offset_window: Optional[MetricTimeWindow] = None
+    offset_to_grain: Optional[TimeGranularity] = None
 
 
 class MetricTypeParams(HashableBaseModel):
     """Type params add additional context to certain metric types (the context depends on the metric type)"""
 
-    measure: Optional[MetricInputMeasure]
-    measures: Optional[List[MetricInputMeasure]]
-    numerator: Optional[MetricInputMeasure]
-    denominator: Optional[MetricInputMeasure]
-    expr: Optional[str]
-    window: Optional[MetricTimeWindow]
-    grain_to_date: Optional[TimeGranularity]
-    metrics: Optional[List[MetricInput]]
+    measure: Optional[MetricInputMeasure] = None
+    measures: Optional[List[MetricInputMeasure]] = None
+    numerator: Optional[MetricInputMeasure] = None
+    denominator: Optional[MetricInputMeasure] = None
+    expr: Optional[str] = None
+    window: Optional[MetricTimeWindow] = None
+    grain_to_date: Optional[TimeGranularity] = None
+    metrics: Optional[List[MetricInput]] = None
+
+    @field_validator('measure', 'numerator', 'denominator', mode='before')
+    @classmethod
+    def parse_measure_input(cls, v):
+        if isinstance(v, str):
+            return MetricInputMeasure(name=v)
+        return v
+
+    @field_validator('measures', mode='before')
+    @classmethod
+    def parse_measures_input(cls, v):
+        if isinstance(v, list):
+            return [MetricInputMeasure(name=item) if isinstance(item, str) else item for item in v]
+        return v
+
+    @field_validator('window', mode='before')
+    @classmethod
+    def parse_window_input(cls, v):
+        if isinstance(v, str):
+            return MetricTimeWindow.parse(v)
+        return v
 
     @property
     def numerator_measure_reference(self) -> Optional[MeasureReference]:
@@ -157,11 +179,18 @@ class Metric(HashableBaseModel, ModelWithMetadataParsing):
     """Describes a metric"""
 
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     type: MetricType
-    type_params: MetricTypeParams
-    constraint: Optional[WhereClauseConstraint]
-    metadata: Optional[Metadata]
+    type_params: Optional[MetricTypeParams] = None
+    constraint: Optional[WhereClauseConstraint] = None
+    metadata: Optional[Metadata] = None
+
+    @field_validator('constraint', mode='before')
+    @classmethod
+    def parse_constraint_input(cls, v):
+        if isinstance(v, str):
+            return WhereClauseConstraint.parse(v)
+        return v
 
     @property
     def input_measures(self) -> List[MetricInputMeasure]:

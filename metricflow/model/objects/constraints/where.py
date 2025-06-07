@@ -16,7 +16,7 @@ LITERAL_STR = "literal"
 INTERVAL_LITERAL = "interval"
 
 
-class WhereClauseConstraint(PydanticCustomInputParser, HashableBaseModel):
+class WhereClauseConstraint(HashableBaseModel, PydanticCustomInputParser):
     """Contains a string that is a where clause"""
 
     where: str

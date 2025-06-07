@@ -312,13 +312,13 @@ def parse_config_yaml(
             try:
                 if document_type == METRIC_TYPE:
                     metric_validator.validate(config_document[document_type])
-                    results.append(metric_class.parse_obj(object_cfg))
+                    results.append(metric_class.model_validate(object_cfg))
                 elif document_type == DATA_SOURCE_TYPE:
                     data_source_validator.validate(config_document[document_type])
-                    results.append(data_source_class.parse_obj(object_cfg))
+                    results.append(data_source_class.model_validate(object_cfg))
                 elif document_type == MATERIALIZATION_TYPE:
                     materialization_validator.validate(config_document[document_type])
-                    results.append(materialization_class.parse_obj(object_cfg))
+                    results.append(materialization_class.model_validate(object_cfg))
                 else:
                     issues.append(
                         ValidationError(

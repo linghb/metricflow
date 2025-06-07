@@ -5,7 +5,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any, Callable, ClassVar, Generic, Iterator, TypeVar
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, model_validator, ConfigDict
 
 from metricflow.errors.errors import ParsingException
 from metricflow.model.parsing.yaml_loader import ParsingContext, PARSING_CONTEXT_KEY
@@ -18,21 +18,17 @@ class HashableBaseModel(BaseModel):
     """Extends BaseModel with a generic hash function"""
 
     def __hash__(self) -> int:  # noqa: D
-        return hash(json.dumps(self.json(sort_keys=True), sort_keys=True))
+        return hash(json.dumps(self.model_dump_json(), sort_keys=True))
 
 
 class FrozenBaseModel(HashableBaseModel):
     """Similar to HashableBaseModel but faux immutable."""
 
-    class Config:
-        """Pydantic feature."""
-
-        allow_mutation = False
+    model_config = ConfigDict(frozen=True)
 
     def to_pretty_json(self) -> str:
         """Convert to a pretty JSON representation."""
-        raw_json_str = self.json()
-        json_obj = json.loads(raw_json_str)
+        json_obj = self.model_dump()
         return json.dumps(json_obj, indent=4)
 
     def __str__(self) -> str:  # noqa: D
@@ -55,7 +51,7 @@ class ModelWithMetadataParsing(BaseModel):
 
     __METADATA_KEY__: ClassVar[str] = "metadata"
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     @classmethod
     def extract_metadata_from_parsing_context(cls, values: PydanticParseableValueType) -> PydanticParseableValueType:
         """Takes info from parsing context and converts it to a Metadata model object

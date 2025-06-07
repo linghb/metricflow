@@ -129,7 +129,7 @@ class DbtConverter:
         data_sources: List[Type[DataSource]] = []
         for data_source_dict in copied_objects.data_sources.values():
             try:
-                data_sources.append(self.data_source_class.parse_obj(data_source_dict))
+                data_sources.append(self.data_source_class.model_validate(data_source_dict))
             except Exception as e:
                 issues.append(
                     ValidationError(
@@ -141,7 +141,7 @@ class DbtConverter:
         materializations: List[Type[Materialization]] = []
         for materialization_dict in copied_objects.materializations.values():
             try:
-                materializations.append(self.materialization_class.parse_obj(materialization_dict))
+                materializations.append(self.materialization_class.model_validate(materialization_dict))
             except Exception as e:
                 issues.append(
                     ValidationError(
@@ -153,7 +153,7 @@ class DbtConverter:
         metrics: List[Type[Metric]] = []
         for metric_dict in copied_objects.metrics.values():
             try:
-                metrics.append(self.metric_class.parse_obj(metric_dict))
+                metrics.append(self.metric_class.model_validate(metric_dict))
             except Exception as e:
                 issues.append(
                     ValidationError(

@@ -42,7 +42,7 @@ class DimensionTypeParams(HashableBaseModel):
     is_primary: bool = False
     # For legacy support. This is not used.
     time_format: str = ISO8601_FMT
-    time_granularity: TimeGranularity
+    time_granularity: Optional[TimeGranularity] = None
     validity_params: Optional[DimensionValidityParams] = None
 
 
@@ -50,12 +50,12 @@ class Dimension(HashableBaseModel, ModelWithMetadataParsing):
     """Describes a dimension"""
 
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     type: DimensionType
     is_partition: bool = False
-    type_params: Optional[DimensionTypeParams]
+    type_params: Optional[DimensionTypeParams] = None
     expr: Optional[str] = None
-    metadata: Optional[Metadata]
+    metadata: Optional[Metadata] = None
 
     @property
     def is_primary_time(self) -> bool:  # noqa: D

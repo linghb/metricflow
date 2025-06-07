@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import date
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from metricflow.instances import (
     DataSourceElementReference,
@@ -65,10 +65,7 @@ class FileContext(BaseModel):
     file_name: Optional[str]
     line_number: Optional[int]
 
-    class Config:
-        """Pydantic class configuration options"""
-
-        extra = Extra.forbid
+    model_config = ConfigDict(extra="forbid")
 
     def context_str(self) -> str:
         """Human readable stringified representation of the context"""
@@ -364,15 +361,15 @@ class ModelValidationRule(ABC):
 
     @classmethod
     def validate_model_serialized_for_multiprocessing(cls, serialized_model: str) -> str:
-        """Validate a model serialized via Pydantic's .json() method, and return a list of JSON serialized issues
+        """Validate a model serialized via Pydantic's .model_dump_json() method, and return a list of JSON serialized issues
 
         This method exists because our validations are forked into parallel processes via
         multiprocessing.ProcessPoolExecutor, and passing a model or validation results object can result in
         idiosyncratic behavior and inscrutable errors due to interactions between pickling and pydantic objects.
         """
         return ModelValidationResults.from_issues_sequence(
-            cls.validate_model(UserConfiguredModel.parse_raw(serialized_model))
-        ).json()
+            cls.validate_model(UserConfiguredModel.model_validate_json(serialized_model))
+        ).model_dump_json()
 
 
 class ModelValidationException(Exception):

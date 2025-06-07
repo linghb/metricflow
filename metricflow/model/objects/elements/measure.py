@@ -33,11 +33,11 @@ class Measure(HashableBaseModel, ModelWithMetadataParsing):
 
     name: str
     agg: AggregationType
-    description: Optional[str]
-    create_metric: Optional[bool]
+    description: Optional[str] = None
+    create_metric: Optional[bool] = None
     expr: Optional[str] = None
-    agg_params: Optional[MeasureAggregationParameters]
-    metadata: Optional[Metadata]
+    agg_params: Optional[MeasureAggregationParameters] = None
+    metadata: Optional[Metadata] = None
     non_additive_dimension: Optional[NonAdditiveDimensionParameters] = None
 
     # Defines the time dimension to aggregate this measure by. If not specified, it means to use the primary time
