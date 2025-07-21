@@ -16,6 +16,7 @@ from metricflow.sql.sql_bind_parameters import SqlBindParameters
 from metricflow.sql_clients.base_sql_client_implementation import SqlClientException
 from metricflow.sql_clients.common_client import SqlDialect, not_empty
 from metricflow.sql_clients.duckdb import DuckDbSqlClient
+from metricflow.sql_clients.mysql import MySQLSqlClient
 
 
 def make_df(  # type: ignore [misc]
@@ -57,8 +58,10 @@ def make_sql_client(url: str, password: str) -> AsyncSqlClient:
 
     if dialect == SqlDialect.DUCKDB:
         return DuckDbSqlClient.from_connection_details(url, password)
+    elif dialect == SqlDialect.MYSQL:
+        return MySQLSqlClient.from_connection_details(url, password)
     else:
-        raise ValueError(f"Only DuckDB dialect is supported in this build. Got: `{dialect}` in URL {url}")
+        raise ValueError(f"Only DuckDB and MySQL dialects are supported in this build. Got: `{dialect}` in URL {url}")
 
 
 def make_sql_client_from_config(handler: YamlFileHandler) -> AsyncSqlClient:
@@ -69,8 +72,21 @@ def make_sql_client_from_config(handler: YamlFileHandler) -> AsyncSqlClient:
     if dialect == SqlDialect.DUCKDB.value:
         database = not_empty(handler.get_value(CONFIG_DWH_DB), CONFIG_DWH_DB, url)
         return DuckDbSqlClient(file_path=database)
+    elif dialect == SqlDialect.MYSQL.value:
+        # For MySQL, we need to construct a connection URL from config components
+        host = not_empty(handler.get_value("host"), "host", url)
+        port = not_empty(handler.get_value("port"), "port", url)
+        username = not_empty(handler.get_value("username"), "username", url)
+        password = not_empty(handler.get_value("password"), "password", url)
+        database = not_empty(handler.get_value("database"), "database", url)
+
+        # Construct MySQL URL
+        mysql_url = f"mysql://{username}@{host}:{port}/{database}"
+        return MySQLSqlClient.from_connection_details(mysql_url, password)
     else:
-        raise ValueError(f"Only DuckDB dialect is supported in this build. Got dialect '{dialect}' in {url}")
+        raise ValueError(
+            f"Only DuckDB and MySQL dialects are supported in this build. Got dialect '{dialect}' in {url}"
+        )
 
 
 def sync_execute(  # noqa: D

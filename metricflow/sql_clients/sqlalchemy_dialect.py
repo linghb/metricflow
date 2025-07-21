@@ -141,21 +141,17 @@ class SqlAlchemySqlClient(BaseSqlClientImplementation, ABC):
     ) -> None:
         logger.info(f"Creating table '{sql_table.sql}' from a DataFrame with {df.shape[0]} row(s)")
         start_time = time.time()
-        # Use raw DBAPI connection to avoid pandas compatibility issues with newer pandas versions
-        raw_conn = self._engine.raw_connection()
-        try:
+        with self._engine_connection(self._engine) as conn:
             pd.io.sql.to_sql(
                 frame=df,
                 name=sql_table.table_name,
-                con=raw_conn,
+                con=conn,
                 schema=sql_table.schema_name,
                 index=False,
                 if_exists="fail",
                 method="multi",
                 chunksize=chunk_size,
             )
-        finally:
-            raw_conn.close()
         logger.info(f"Created table '{sql_table.sql}' from a DataFrame in {time.time() - start_time:.2f}s")
 
     @staticmethod

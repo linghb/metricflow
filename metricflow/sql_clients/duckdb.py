@@ -72,7 +72,6 @@ class DuckDbSqlClient(SqlAlchemySqlClient):
         super().__init__(
             sqlalchemy.create_engine(
                 f"duckdb:///{file_path if file_path else ':memory:'}",
-                connect_args={"check_same_thread": False},
                 poolclass=StaticPool,
             )
         )

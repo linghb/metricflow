@@ -5,7 +5,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any, Callable, ClassVar, Generic, Iterator, TypeVar
 
-from pydantic import BaseModel, model_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, root_validator
 
 from metricflow.errors.errors import ParsingException
 from metricflow.model.parsing.yaml_loader import ParsingContext, PARSING_CONTEXT_KEY
@@ -51,7 +51,7 @@ class ModelWithMetadataParsing(BaseModel):
 
     __METADATA_KEY__: ClassVar[str] = "metadata"
 
-    @model_validator(mode="before")
+    @root_validator(pre=True)
     @classmethod
     def extract_metadata_from_parsing_context(cls, values: PydanticParseableValueType) -> PydanticParseableValueType:
         """Takes info from parsing context and converts it to a Metadata model object
