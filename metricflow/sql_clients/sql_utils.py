@@ -17,6 +17,7 @@ from metricflow.sql_clients.base_sql_client_implementation import SqlClientExcep
 from metricflow.sql_clients.common_client import SqlDialect, not_empty
 from metricflow.sql_clients.duckdb import DuckDbSqlClient
 from metricflow.sql_clients.mysql import MySQLSqlClient
+from metricflow.sql_clients.sqlite import SqliteSqlClient
 
 
 def make_df(  # type: ignore [misc]
@@ -60,8 +61,12 @@ def make_sql_client(url: str, password: str) -> AsyncSqlClient:
         return DuckDbSqlClient.from_connection_details(url, password)
     elif dialect == SqlDialect.MYSQL:
         return MySQLSqlClient.from_connection_details(url, password)
+    elif dialect == SqlDialect.SQLITE:
+        return SqliteSqlClient.from_connection_details(url, password)
     else:
-        raise ValueError(f"Only DuckDB and MySQL dialects are supported in this build. Got: `{dialect}` in URL {url}")
+        raise ValueError(
+            f"Only DuckDB, MySQL, and SQLite dialects are supported in this build. Got: `{dialect}` in URL {url}"
+        )
 
 
 def make_sql_client_from_config(handler: YamlFileHandler) -> AsyncSqlClient:
@@ -83,9 +88,12 @@ def make_sql_client_from_config(handler: YamlFileHandler) -> AsyncSqlClient:
         # Construct MySQL URL
         mysql_url = f"mysql://{username}@{host}:{port}/{database}"
         return MySQLSqlClient.from_connection_details(mysql_url, password)
+    elif dialect == SqlDialect.SQLITE.value:
+        database = not_empty(handler.get_value(CONFIG_DWH_DB), CONFIG_DWH_DB, url)
+        return SqliteSqlClient(file_path=database)
     else:
         raise ValueError(
-            f"Only DuckDB and MySQL dialects are supported in this build. Got dialect '{dialect}' in {url}"
+            f"Only DuckDB, MySQL, and SQLite dialects are supported in this build. Got dialect '{dialect}' in {url}"
         )
 
 

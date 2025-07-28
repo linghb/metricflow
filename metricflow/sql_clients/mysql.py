@@ -109,18 +109,18 @@ class MySQLSqlClient(SqlAlchemySqlClient):
         # Create table schema based on DataFrame dtypes
         column_definitions = []
         for col_name, dtype in df.dtypes.items():
-            if dtype == 'object':
-                sql_type = 'TEXT'
-            elif dtype == 'int64':
-                sql_type = 'BIGINT'
-            elif dtype == 'float64':
-                sql_type = 'DOUBLE'
-            elif dtype == 'bool':
-                sql_type = 'BOOLEAN'
-            elif 'datetime' in str(dtype):
-                sql_type = 'DATETIME'
+            if dtype == "object":
+                sql_type = "TEXT"
+            elif dtype == "int64":
+                sql_type = "BIGINT"
+            elif dtype == "float64":
+                sql_type = "DOUBLE"
+            elif dtype == "bool":
+                sql_type = "BOOLEAN"
+            elif "datetime" in str(dtype):
+                sql_type = "DATETIME"
             else:
-                sql_type = 'TEXT'
+                sql_type = "TEXT"
             column_definitions.append(f"`{col_name}` {sql_type}")
 
         # Create table
@@ -139,7 +139,7 @@ class MySQLSqlClient(SqlAlchemySqlClient):
                 values = []
                 for value in row:
                     if pd.isna(value):
-                        values.append('NULL')
+                        values.append("NULL")
                     elif isinstance(value, str):
                         # Escape single quotes
                         escaped_value = value.replace("'", "''")
@@ -147,7 +147,7 @@ class MySQLSqlClient(SqlAlchemySqlClient):
                     elif isinstance(value, (int, float)):
                         values.append(str(value))
                     elif isinstance(value, bool):
-                        values.append('1' if value else '0')
+                        values.append("1" if value else "0")
                     else:
                         values.append(f"'{str(value)}'")
                 values_list.append(f"({', '.join(values)})")

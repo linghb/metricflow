@@ -14,6 +14,7 @@ class SqlDialect(ExtendedEnum):
     SNOWFLAKE = "snowflake"
     BIGQUERY = "bigquery"
     DATABRICKS = "databricks"
+    SQLITE = "sqlite"
 
 
 T = TypeVar("T")

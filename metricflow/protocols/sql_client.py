@@ -20,6 +20,7 @@ class SqlEngine(Enum):
     POSTGRES = "Postgres"
     SNOWFLAKE = "Snowflake"
     DATABRICKS = "Databricks"
+    SQLITE = "SQLite"
 
     # Not yet supported.
     MYSQL = "MySQL"
