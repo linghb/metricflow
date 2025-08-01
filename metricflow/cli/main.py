@@ -37,7 +37,7 @@ from metricflow.cli.utils import (
     MF_DATABRICKS_KEYS,
 )
 from metricflow.configuration.config_builder import YamlTemplateBuilder
-from metricflow.configuration.constants import ENV_MODEL_PATH
+from metricflow.configuration.constants import ENV_MF_DICT, CONFIG_MODEL_PATH
 from metricflow.dataflow.sql_table import SqlTable
 from metricflow.dataflow.dataflow_plan_to_text import dataflow_plan_as_text
 from metricflow.engine.metricflow_engine import MetricFlowQueryRequest, MetricFlowExplainResult, MetricFlowQueryResult
@@ -260,8 +260,8 @@ def tutorial(ctx: click.core.Context, cfg: CLIContext, msg: bool, skip_dw: bool,
         spinner.succeed("📀 Sample tables have been successfully created into your data warehouse.")
 
     # Seed sample model file
-    if os.getenv(ENV_MODEL_PATH):
-        model_path = pathlib.Path(os.getenv(ENV_MODEL_PATH))
+    if os.getenv(ENV_MF_DICT[CONFIG_MODEL_PATH]):
+        model_path = pathlib.Path(os.getenv(ENV_MF_DICT[CONFIG_MODEL_PATH]))
     else:
         model_path = os.path.join(cfg.config.dir_path, "sample_models")
     pathlib.Path(model_path).mkdir(parents=True, exist_ok=True)
