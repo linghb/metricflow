@@ -24,7 +24,9 @@ class YamlFileHandler:
         """Attempts to get a corresponding value from the yaml file. Throw an error if not exists or None."""
         #add env logic
         if key in ENV_MF_DICT:
-            return os.getenv(ENV_MF_DICT[key])
+            env_value = os.getenv(ENV_MF_DICT[key])
+            if env_value:
+                return env_value
         content = self._load_yaml()
         return content.get(key)
 
